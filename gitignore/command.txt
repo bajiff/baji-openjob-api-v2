@@ -1,0 +1,65 @@
+Update Job with Valid Id
+http://localhost:{{port}}/jobs/{{jobId}}
+Payload: {
+    "company_id": "{{jobCompanyId}}",
+    "category_id": "{{jobCategoryId}}",
+    "title": "Lead Backend Developer",
+    "description": "We are looking for experienced backend developer",
+    "job_type": "full-time",
+    "experience_level": "senior",
+    "location_type": "remote",
+    "location_city": "Jakarta",
+    "salary_min": 15000000,
+    "salary_max": 25000000,
+    "is_salary_visible": true,
+    "status": "close"
+}
+
+Script test: pm.test('it should response 200 status code', () => {
+    pm.expect(pm.response).to.have.status(200);
+});
+
+pm.test('response Content-Type header should have application/json value', () => {
+    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');
+});
+
+pm.test('response body should have correct property and value', () => {
+    const responseJson = pm.response.json();
+    pm.expect(responseJson.status).to.equal('success');
+    pm.expect(responseJson.message).to.be.a('string');
+});
+
+pm.test('when GET detail job', () => {
+    const jobId = pm.environment.get('jobId');
+    const port = pm.environment.get('port');
+    pm.sendRequest(`http://localhost:${port}/jobs/${jobId}`, (error, response) => {
+        if (!error) {
+            pm.test('it should response with revised content', () => {
+                pm.expect(response.code).to.equal(200);
+
+                const responseJson = response.json();
+
+                pm.expect(responseJson.status).to.equal('success');
+                pm.expect(responseJson.data).to.be.an('object');
+                pm.expect(responseJson.data.id).to.equal(jobId);
+                pm.expect(responseJson.data.title).to.equal('Lead Backend Developer');
+            });
+        }
+    });
+});
+
+Test Result: Fail Test Result: it should response with revised content | AssertionError: expected 'Senior Backend Developer' to equal 'Lead Backend Developer'
+
+
+
+Get Bookmarks by User (Cache Miss - First Request)
+http://localhost:{{port}}/bookmarks
+pm.test('Status 200 OK', function() {
+    pm.expect(pm.response).to.have.status(200);
+});
+
+pm.test('HAS X-Data-Source: cache header', function() {
+    pm.expect(pm.response.headers.get('X-Data-Source')).to.equal('database');
+});
+
+Test result: Fail HAS X-Data-Source: cache header | AssertionError: expected 'cache' to equal 'database'
