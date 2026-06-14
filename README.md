@@ -1,4 +1,4 @@
-# 🚀 OpenJob RESTful API V1
+# 🚀 OpenJob RESTful API V2
 
 > **OpenJob** — Sebuah RESTful API untuk platform lowongan kerja (job portal) yang dibangun menggunakan **Express.js** dan **PostgreSQL**. API ini menyediakan fitur manajemen pengguna, autentikasi JWT, manajemen perusahaan, kategori pekerjaan, lowongan kerja, dan lamaran kerja.
 
@@ -12,10 +12,21 @@
 
 ## :ledger: Index
 
-- [Introduction](#-openjob-restful-api-v1)
+- [🚀 OpenJob RESTful API V2](#-openjob-restful-api-v2)
   - [:ledger: Index](#ledger-index)
   - [:beginner: About](#beginner-about)
   - [:zap: Usage](#zap-usage)
+    - [Base URL](#base-url)
+    - [Endpoint Overview](#endpoint-overview)
+      - [🏠 Root](#-root)
+      - [👤 Users](#-users)
+      - [🔐 Authentications](#-authentications)
+      - [📋 Profile](#-profile)
+      - [🏢 Companies](#-companies)
+      - [🏷️ Categories](#️-categories)
+      - [💼 Jobs](#-jobs)
+      - [📝 Applications](#-applications)
+      - [🔖 Bookmarks](#-bookmarks)
     - [:electric\_plug: Installation](#electric_plug-installation)
     - [:package: Commands](#package-commands)
   - [:wrench: Development](#wrench-development)
@@ -27,6 +38,8 @@
   - [:cherry\_blossom: Community](#cherry_blossom-community)
     - [:fire: Contribution](#fire-contribution)
     - [:cactus: Branches](#cactus-branches)
+      - [Steps to work with feature branch](#steps-to-work-with-feature-branch)
+      - [Steps to create a pull request](#steps-to-create-a-pull-request)
     - [:exclamation: Guideline](#exclamation-guideline)
   - [:question: FAQ](#question-faq)
   - [:page\_facing\_up: Resources](#page_facing_up-resources)
@@ -40,7 +53,7 @@
 
 ## :beginner: About
 
-**OpenJob RESTful API V1** adalah sebuah *backend service* untuk platform pencarian dan perekrutan kerja (*job portal*). Proyek ini dibangun sebagai submission dalam kursus **Belajar Fundamental Back-End dengan JavaScript** di [Dicoding](https://www.dicoding.com/).
+**OpenJob RESTful API V2** adalah sebuah *backend service* untuk platform pencarian dan perekrutan kerja (*job portal*). Proyek ini dibangun sebagai submission dalam kursus **Belajar Fundamental Back-End dengan JavaScript** di [Dicoding](https://www.dicoding.com/).
 
 API ini menggunakan arsitektur modular dengan pemisahan yang jelas antara *routes*, *handlers*, *services*, dan *validators*. Fitur-fitur utama meliputi:
 
@@ -164,8 +177,8 @@ Ikuti langkah-langkah berikut untuk menginstal dan menjalankan proyek ini di lin
 **1. Clone repository:**
 
 ```bash
-git clone https://github.com/bajiff/baji-openjob-api-v1.git
-cd baji-openjob-api-v1
+git clone https://github.com/bajiff/baji-openjob-api-v2.git
+cd baji-openjob-api-v2
 ```
 
 **2. Install dependencies:**
@@ -221,14 +234,14 @@ Server akan berjalan di `http://localhost:3000`.
 
 ### :package: Commands
 
-| Perintah               | Deskripsi                                        |
-|------------------------|--------------------------------------------------|
-| `npm start`            | Menjalankan server dalam mode production          |
+| Perintah               | Deskripsi                                           |
+|------------------------|-----------------------------------------------------|
+| `npm start`            | Menjalankan server dalam mode production            |
 | `npm run start:dev`    | Menjalankan server dalam mode development (nodemon) |
-| `npm run lint`         | Menjalankan ESLint untuk pengecekan kode          |
-| `npm run migrate up`   | Menjalankan migrasi database (naik)               |
-| `npm run migrate down` | Menjalankan rollback migrasi database (turun)     |
-| `npm run truncate`     | Mengosongkan data di tabel database               |
+| `npm run lint`         | Menjalankan ESLint untuk pengecekan kode            |
+| `npm run migrate up`   | Menjalankan migrasi database (naik)                 |
+| `npm run migrate down` | Menjalankan rollback migrasi database (turun)       |
+| `npm run truncate`     | Mengosongkan data di tabel database                 |
 
 ---
 
@@ -252,8 +265,8 @@ Pastikan sistem Anda sudah memiliki tools berikut:
 1. **Fork & Clone** repository ini:
 
    ```bash
-   git clone https://github.com/bajiff/baji-openjob-api-v1.git
-   cd baji-openjob-api-v1
+   git clone https://github.com/bajiff/baji-openjob-api-v2.git
+   cd baji-openjob-api-v2
    ```
 
 2. **Install dependencies:**
@@ -292,7 +305,7 @@ Pastikan sistem Anda sudah memiliki tools berikut:
 
 ```bash
 .
-├── migrations/                              # Database migration files
+├── migrations/                              
 │   ├── ..._create-table-users.js
 │   ├── ..._create-table-authentications.js
 │   ├── ..._create-table-companies.js
@@ -301,7 +314,7 @@ Pastikan sistem Anda sudah memiliki tools berikut:
 │   ├── ..._create-table-applications.js
 │   └── ..._create-table-bookmarks.js
 ├── src/
-│   ├── api/                                 # Route & Handler (per module)
+│   ├── api/                                 
 │   │   ├── applications/
 │   │   │   ├── handler.js                   # Request handler
 │   │   │   ├── index.js                     # Router factory
@@ -455,15 +468,15 @@ Kontribusi Anda selalu disambut dan dihargai. Berikut beberapa cara untuk berkon
 
 1. **Report a bug** 🐛
 
-   Jika Anda menemukan bug, silakan laporkan melalui [Issues](https://github.com/bajiff/baji-openjob-api-v1/issues) dan saya akan menanganinya.
+   Jika Anda menemukan bug, silakan laporkan melalui [Issues](https://github.com/bajiff/baji-openjob-api-v2/issues) dan saya akan menanganinya.
 
 2. **Request a feature** 💡
 
-   Anda juga dapat mengajukan fitur baru melalui [Issues](https://github.com/bajiff/baji-openjob-api-v1/issues), dan jika layak, akan dimasukkan ke dalam pengembangan.
+   Anda juga dapat mengajukan fitur baru melalui [Issues](https://github.com/bajiff/baji-openjob-api-v2/issues), dan jika layak, akan dimasukkan ke dalam pengembangan.
 
 3. **Create a pull request** 🔀
 
-   Pull request Anda akan sangat dihargai oleh komunitas. Silakan pilih issue yang terbuka dari [sini](https://github.com/bajiff/baji-openjob-api-v1/issues) dan buat pull request.
+   Pull request Anda akan sangat dihargai oleh komunitas. Silakan pilih issue yang terbuka dari [sini](https://github.com/bajiff/baji-openjob-api-v2/issues) dan buat pull request.
 
 > Jika Anda baru mengenal open-source, pastikan untuk membaca lebih lanjut [di sini](https://www.digitalocean.com/community/tutorial_series/an-introduction-to-open-source) dan pelajari cara membuat pull request [di sini](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github).
 
@@ -567,7 +580,7 @@ Temukan saya di media sosial berikut:
 
 Hubungi saya melalui salah satu platform di atas atau buat issue di repository ini:
 
-📧 **GitHub Issues:** [https://github.com/bajiff/baji-openjob-api-v1/issues](https://github.com/bajiff/baji-openjob-api-v1/issues)
+📧 **GitHub Issues:** [https://github.com/bajiff/baji-openjob-api-v2/issues](https://github.com/bajiff/baji-openjob-api-v2/issues)
 
 ---
 

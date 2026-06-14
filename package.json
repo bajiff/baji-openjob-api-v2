@@ -1,7 +1,7 @@
 {
-  "name": "baji-openjob-api-v1",
+  "name": "baji-openjob-api-v2",
   "version": "1.0.0",
-  "description": "Kode yang isinya buat submission open job",
+  "description": "Kode yang isinya buat submission open job v2",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
