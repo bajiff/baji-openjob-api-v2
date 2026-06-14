@@ -1,0 +1,8 @@
+/node_modules
+/dist
+/build
+/.vscode
+.env
+/OpenJob-RESTful-API-V1-Test
+/reviewer
+/gitignore
