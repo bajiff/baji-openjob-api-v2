@@ -1,10 +1,12 @@
 # 🚀 OpenJob RESTful API V2
 
-> **OpenJob** — Sebuah RESTful API untuk platform lowongan kerja (job portal) yang dibangun menggunakan **Express.js** dan **PostgreSQL**. API ini menyediakan fitur manajemen pengguna, autentikasi JWT, manajemen perusahaan, kategori pekerjaan, lowongan kerja, dan lamaran kerja.
+> **OpenJob** — Sebuah RESTful API untuk platform lowongan kerja (job portal) yang dibangun menggunakan **Express.js** dan **PostgreSQL**, dengan arsitektur **microservice** (API App + Consumer App) yang berkomunikasi melalui **RabbitMQ**.
 
 ![Node.js](https://img.shields.io/badge/Node.js-v24-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-v5-000000?style=for-the-badge&logo=express&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 ![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)
 
@@ -13,41 +15,17 @@
 ## :ledger: Index
 
 - [🚀 OpenJob RESTful API V2](#-openjob-restful-api-v2)
-  - [:ledger: Index](#ledger-index)
   - [:beginner: About](#beginner-about)
   - [:zap: Usage](#zap-usage)
-    - [Base URL](#base-url)
-    - [Endpoint Overview](#endpoint-overview)
-      - [🏠 Root](#-root)
-      - [👤 Users](#-users)
-      - [🔐 Authentications](#-authentications)
-      - [📋 Profile](#-profile)
-      - [🏢 Companies](#-companies)
-      - [🏷️ Categories](#️-categories)
-      - [💼 Jobs](#-jobs)
-      - [📝 Applications](#-applications)
-      - [🔖 Bookmarks](#-bookmarks)
-    - [:electric\_plug: Installation](#electric_plug-installation)
-    - [:package: Commands](#package-commands)
+  - [:electric\_plug: Installation](#electric_plug-installation)
+  - [:package: Commands](#package-commands)
   - [:wrench: Development](#wrench-development)
-    - [:notebook: Pre-Requisites](#notebook-pre-requisites)
-    - [:nut\_and\_bolt: Development Environment](#nut_and_bolt-development-environment)
-    - [:file\_folder: File Structure](#file_folder-file-structure)
-    - [:hammer: Build](#hammer-build)
-    - [:rocket: Deployment](#rocket-deployment)
-  - [:cherry\_blossom: Community](#cherry_blossom-community)
-    - [:fire: Contribution](#fire-contribution)
-    - [:cactus: Branches](#cactus-branches)
-      - [Steps to work with feature branch](#steps-to-work-with-feature-branch)
-      - [Steps to create a pull request](#steps-to-create-a-pull-request)
-    - [:exclamation: Guideline](#exclamation-guideline)
+  - [:file\_folder: File Structure](#file_folder-file-structure)
   - [:question: FAQ](#question-faq)
   - [:page\_facing\_up: Resources](#page_facing_up-resources)
-  - [:camera: Gallery](#camera-gallery)
   - [:star2: Credit/Acknowledgment](#star2-creditacknowledgment)
   - [:lock: License](#lock-license)
   - [:globe\_with\_meridians: My Social Media](#globe_with_meridians-my-social-media)
-  - [:mailbox: Contact](#mailbox-contact)
 
 ---
 
@@ -55,23 +33,31 @@
 
 **OpenJob RESTful API V2** adalah sebuah *backend service* untuk platform pencarian dan perekrutan kerja (*job portal*). Proyek ini dibangun sebagai submission dalam kursus **Belajar Fundamental Back-End dengan JavaScript** di [Dicoding](https://www.dicoding.com/).
 
-API ini menggunakan arsitektur modular dengan pemisahan yang jelas antara *routes*, *handlers*, *services*, dan *validators*. Fitur-fitur utama meliputi:
+Proyek ini terdiri dari **2 aplikasi independen** yang saling berkomunikasi melalui **RabbitMQ**:
 
-- 🔐 **Autentikasi & Otorisasi** — Registrasi, login, dan pengelolaan token menggunakan JWT (Access Token & Refresh Token).
-- 👤 **Manajemen Pengguna** — CRUD user dan profil pengguna.
-- 🏢 **Manajemen Perusahaan** — CRUD data perusahaan yang membuka lowongan.
-- 🏷️ **Kategori Pekerjaan** — Pengelompokan lowongan berdasarkan kategori.
-- 💼 **Lowongan Kerja (Jobs)** — CRUD lowongan kerja dengan detail lengkap.
-- 📝 **Lamaran Kerja (Applications)** — Pengguna dapat melamar pekerjaan yang tersedia.
-- 🔖 **Bookmark Lowongan** — Pengguna dapat menyimpan (bookmark) lowongan kerja favorit untuk dilihat kembali nanti.
-- ✅ **Validasi Data** — Menggunakan **Joi** untuk validasi payload request.
-- 🛡️ **Error Handling** — Custom error classes (ClientError, NotFoundError, InvariantError, AuthenticationError) dengan middleware error handler terpusat.
+| Aplikasi | Deskripsi |
+|---|---|
+| **baji-openjob-app** | API utama (Express.js) — menangani semua endpoint REST |
+| **baji-openjob-consumer** | Worker independen — memproses antrian pesan & mengirim email notifikasi |
+
+### Fitur Utama
+
+- 🔐 **Autentikasi & Otorisasi** — JWT (Access Token & Refresh Token)
+- 👤 **Manajemen Pengguna** — CRUD user dan profil pengguna
+- 🏢 **Manajemen Perusahaan** — CRUD data perusahaan
+- 🏷️ **Kategori Pekerjaan** — Pengelompokan lowongan berdasarkan kategori
+- 💼 **Lowongan Kerja (Jobs)** — CRUD lowongan kerja dengan detail lengkap
+- 📝 **Lamaran Kerja (Applications)** — Pengguna dapat melamar pekerjaan
+- 🔖 **Bookmark Lowongan** — Simpan lowongan favorit
+- 📄 **Upload Dokumen PDF** — Upload berkas PDF menggunakan Multer (maks 5MB)
+- ⚡ **Caching (Redis)** — Server-side caching dengan header `X-Data-Source`
+- 🐇 **Message Queue (RabbitMQ)** — Notifikasi email otomatis saat ada lamaran baru
+- ✅ **Validasi Data** — Menggunakan **Joi**
+- 🛡️ **Error Handling** — Custom error classes dengan middleware terpusat
 
 ---
 
 ## :zap: Usage
-
-API ini menyediakan beberapa endpoint RESTful yang dapat diakses menggunakan HTTP client seperti **Postman**, **cURL**, atau **Thunder Client**.
 
 ### Base URL
 
@@ -83,96 +69,114 @@ http://localhost:3000
 
 #### 🏠 Root
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `GET`    | `/`                  | Health check API                   | ❌   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/` | Health check API | ❌ |
 
 #### 👤 Users
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `POST`   | `/users`             | Registrasi pengguna baru           | ❌   |
-| `GET`    | `/users/:id`         | Lihat detail user berdasarkan ID   | ❌   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/users` | Registrasi pengguna baru | ❌ |
+| `GET` | `/users/:id` | Lihat detail user | ❌ |
 
 #### 🔐 Authentications
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `POST`   | `/authentications`   | Login (mendapatkan token)          | ❌   |
-| `PUT`    | `/authentications`   | Refresh access token               | ❌   |
-| `DELETE` | `/authentications`   | Logout (hapus refresh token)       | ❌   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/authentications` | Login (mendapatkan token) | ❌ |
+| `PUT` | `/authentications` | Refresh access token | ❌ |
+| `DELETE` | `/authentications` | Logout (hapus refresh token) | ❌ |
 
 #### 📋 Profile
 
-| Method   | Endpoint                | Deskripsi                          | Auth |
-|----------|-------------------------|------------------------------------|------|
-| `GET`    | `/profile`              | Lihat profil pengguna              | ✅   |
-| `GET`    | `/profile/applications` | Lihat lamaran milik pengguna       | ✅   |
-| `GET`    | `/profile/bookmarks`    | Lihat bookmark milik pengguna      | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/profile` | Lihat profil pengguna | ✅ |
+| `GET` | `/profile/applications` | Lihat lamaran milik pengguna | ✅ |
+| `GET` | `/profile/bookmarks` | Lihat bookmark milik pengguna | ✅ |
 
 #### 🏢 Companies
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `GET`    | `/companies`         | Lihat daftar perusahaan            | ❌   |
-| `GET`    | `/companies/:id`     | Lihat detail perusahaan            | ❌   |
-| `POST`   | `/companies`         | Tambah perusahaan                  | ✅   |
-| `PUT`    | `/companies/:id`     | Update data perusahaan             | ✅   |
-| `DELETE` | `/companies/:id`     | Hapus perusahaan                   | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/companies` | Lihat daftar perusahaan | ❌ |
+| `GET` | `/companies/:id` | Lihat detail perusahaan | ❌ |
+| `POST` | `/companies` | Tambah perusahaan | ✅ |
+| `PUT` | `/companies/:id` | Update data perusahaan | ✅ |
+| `DELETE` | `/companies/:id` | Hapus perusahaan | ✅ |
 
 #### 🏷️ Categories
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `GET`    | `/categories`        | Lihat daftar kategori              | ❌   |
-| `GET`    | `/categories/:id`    | Lihat detail kategori              | ❌   |
-| `POST`   | `/categories`        | Tambah kategori                    | ✅   |
-| `PUT`    | `/categories/:id`    | Update kategori                    | ✅   |
-| `DELETE` | `/categories/:id`    | Hapus kategori                     | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/categories` | Lihat daftar kategori | ❌ |
+| `GET` | `/categories/:id` | Lihat detail kategori | ❌ |
+| `POST` | `/categories` | Tambah kategori | ✅ |
+| `PUT` | `/categories/:id` | Update kategori | ✅ |
+| `DELETE` | `/categories/:id` | Hapus kategori | ✅ |
 
 #### 💼 Jobs
 
-| Method   | Endpoint                          | Deskripsi                          | Auth |
-|----------|-----------------------------------|------------------------------------|------|
-| `GET`    | `/jobs`                           | Lihat daftar lowongan              | ❌   |
-| `GET`    | `/jobs/:id`                       | Lihat detail lowongan              | ❌   |
-| `GET`    | `/jobs/company/:companyId`        | Lihat lowongan per perusahaan      | ❌   |
-| `GET`    | `/jobs/category/:categoryId`      | Lihat lowongan per kategori        | ❌   |
-| `GET`    | `/jobs/bookmarks`                 | Lihat semua lowongan yang di-bookmark | ✅   |
-| `POST`   | `/jobs`                           | Tambah lowongan kerja              | ✅   |
-| `POST`   | `/jobs/:id/bookmark`              | Bookmark sebuah lowongan           | ✅   |
-| `GET`    | `/jobs/:id/bookmark/:bookmarkId`  | Lihat detail bookmark              | ✅   |
-| `PUT`    | `/jobs/:id`                       | Update lowongan kerja              | ✅   |
-| `DELETE` | `/jobs/:id`                       | Hapus lowongan kerja               | ✅   |
-| `DELETE` | `/jobs/:id/bookmark`              | Hapus bookmark lowongan            | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/jobs` | Lihat daftar lowongan | ❌ |
+| `GET` | `/jobs/:id` | Lihat detail lowongan | ❌ |
+| `GET` | `/jobs/company/:companyId` | Lihat lowongan per perusahaan | ❌ |
+| `GET` | `/jobs/category/:categoryId` | Lihat lowongan per kategori | ❌ |
+| `GET` | `/jobs/bookmarks` | Lihat lowongan yang di-bookmark | ✅ |
+| `POST` | `/jobs` | Tambah lowongan kerja | ✅ |
+| `POST` | `/jobs/:id/bookmark` | Bookmark sebuah lowongan | ✅ |
+| `GET` | `/jobs/:id/bookmark/:bookmarkId` | Lihat detail bookmark | ✅ |
+| `PUT` | `/jobs/:id` | Update lowongan kerja | ✅ |
+| `DELETE` | `/jobs/:id` | Hapus lowongan kerja | ✅ |
+| `DELETE` | `/jobs/:id/bookmark` | Hapus bookmark lowongan | ✅ |
 
 #### 📝 Applications
 
-| Method   | Endpoint                        | Deskripsi                          | Auth |
-|----------|---------------------------------|------------------------------------|------|
-| `GET`    | `/applications`                 | Lihat daftar semua lamaran         | ✅   |
-| `GET`    | `/applications/:id`             | Lihat detail lamaran               | ✅   |
-| `GET`    | `/applications/user/:user_id`   | Lihat lamaran per pengguna         | ✅   |
-| `GET`    | `/applications/job/:job_id`     | Lihat lamaran per lowongan         | ✅   |
-| `POST`   | `/applications`                 | Ajukan lamaran kerja               | ✅   |
-| `PUT`    | `/applications/:id`             | Update status lamaran              | ✅   |
-| `DELETE` | `/applications/:id`             | Hapus lamaran                      | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/applications` | Lihat daftar semua lamaran | ✅ |
+| `GET` | `/applications/:id` | Lihat detail lamaran | ✅ |
+| `GET` | `/applications/user/:user_id` | Lihat lamaran per pengguna | ✅ |
+| `GET` | `/applications/job/:job_id` | Lihat lamaran per lowongan | ✅ |
+| `POST` | `/applications` | Ajukan lamaran kerja | ✅ |
+| `PUT` | `/applications/:id` | Update status lamaran | ✅ |
+| `DELETE` | `/applications/:id` | Hapus lamaran | ✅ |
 
 #### 🔖 Bookmarks
 
-| Method   | Endpoint             | Deskripsi                          | Auth |
-|----------|----------------------|------------------------------------|------|
-| `GET`    | `/bookmarks`         | Lihat semua bookmark user          | ✅   |
-| `GET`    | `/bookmarks/:id`     | Lihat detail bookmark              | ✅   |
-| `DELETE` | `/bookmarks/:id`     | Hapus bookmark                     | ✅   |
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `GET` | `/bookmarks` | Lihat semua bookmark user | ✅ |
+| `GET` | `/bookmarks/:id` | Lihat detail bookmark | ✅ |
+| `DELETE` | `/bookmarks/:id` | Hapus bookmark | ✅ |
+
+#### 📄 Documents
+
+| Method | Endpoint | Deskripsi | Auth |
+|--------|----------|-----------|------|
+| `POST` | `/documents` | Upload dokumen PDF | ✅ |
+| `GET` | `/documents/:id` | Lihat detail dokumen | ✅ |
 
 > **✅ Auth** = Membutuhkan header `Authorization: Bearer <access_token>`
 
 ---
 
-### :electric_plug: Installation
+## :electric_plug: Installation
 
-Ikuti langkah-langkah berikut untuk menginstal dan menjalankan proyek ini di lingkungan lokal Anda:
+### Pre-Requisites
+
+| Tool | Versi Minimum | Deskripsi |
+|------|---------------|-----------|
+| **Node.js** | v18+ | Runtime JavaScript |
+| **npm** | v9+ | Package manager |
+| **PostgreSQL** | v14+ | Relational database |
+| **Redis** | v7+ | In-memory cache |
+| **RabbitMQ** | v3+ | Message broker |
+| **Docker** (opsional) | v20+ | Untuk menjalankan Redis & RabbitMQ |
+
+### Langkah Instalasi
 
 **1. Clone repository:**
 
@@ -181,15 +185,20 @@ git clone https://github.com/bajiff/baji-openjob-api-v2.git
 cd baji-openjob-api-v2
 ```
 
-**2. Install dependencies:**
+**2. Jalankan Redis & RabbitMQ (via Docker):**
 
 ```bash
+docker-compose up -d
+```
+
+**3. Setup API App (`baji-openjob-app`):**
+
+```bash
+cd baji-openjob-app
 npm install
 ```
 
-**3. Konfigurasi environment variables:**
-
-Buat file `.env` di root proyek dengan isi berikut:
+Buat file `.env` di dalam folder `baji-openjob-app/`:
 
 ```env
 HOST=localhost
@@ -197,322 +206,206 @@ PORT=3000
 
 PGUSER=your_db_user
 PGPASSWORD=your_db_password
-PGDATABASE=db_openjob
+PGDATABASE=db_openjob_v2
 PGHOST=localhost
 PGPORT=5432
-DATABASE_URL=postgres://your_db_user:your_db_password@localhost:5432/db_openjob
+DATABASE_URL=postgres://your_db_user:your_db_password@localhost:5432/db_openjob_v2
 
 ACCESS_TOKEN_KEY=your_access_token_secret_key
 REFRESH_TOKEN_KEY=your_refresh_token_secret_key
+
+# Redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+
+# RabbitMQ
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
 ```
 
-**4. Buat database PostgreSQL:**
+Buat database dan jalankan migrasi:
 
 ```bash
-createdb db_openjob
-```
-
-**5. Jalankan migrasi database:**
-
-```bash
+createdb db_openjob_v2
 npm run migrate up
 ```
 
-**6. Jalankan server:**
+**4. Setup Consumer App (`baji-openjob-consumer`):**
 
 ```bash
-# Mode development (dengan hot-reload)
+cd ../baji-openjob-consumer
+npm install
+```
+
+Buat file `.env` di dalam folder `baji-openjob-consumer/`:
+
+```env
+# PostgreSQL (sama dengan App)
+PGUSER=your_db_user
+PGPASSWORD=your_db_password
+PGDATABASE=db_openjob_v2
+PGHOST=localhost
+PGPORT=5432
+
+# RabbitMQ
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
+
+# Email (Mailtrap Sandbox)
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USER=your_mailtrap_user
+MAIL_PASSWORD=your_mailtrap_password
+```
+
+**5. Jalankan kedua aplikasi (di terminal terpisah):**
+
+```bash
+# Terminal 1 — API App
+cd baji-openjob-app
 npm run start:dev
 
-# Mode production
+# Terminal 2 — Consumer App
+cd baji-openjob-consumer
 npm start
 ```
 
-Server akan berjalan di `http://localhost:3000`.
+Server API akan berjalan di `http://localhost:3000`.
 
 ---
 
-### :package: Commands
+## :package: Commands
 
-| Perintah               | Deskripsi                                           |
-|------------------------|-----------------------------------------------------|
-| `npm start`            | Menjalankan server dalam mode production            |
-| `npm run start:dev`    | Menjalankan server dalam mode development (nodemon) |
-| `npm run lint`         | Menjalankan ESLint untuk pengecekan kode            |
-| `npm run migrate up`   | Menjalankan migrasi database (naik)                 |
-| `npm run migrate down` | Menjalankan rollback migrasi database (turun)       |
-| `npm run truncate`     | Mengosongkan data di tabel database                 |
+### baji-openjob-app
+
+| Perintah | Deskripsi |
+|----------|-----------|
+| `npm start` | Menjalankan server mode production |
+| `npm run start:dev` | Menjalankan server mode development (nodemon) |
+| `npm run lint` | Menjalankan ESLint |
+| `npm run migrate up` | Menjalankan migrasi database |
+| `npm run migrate down` | Rollback migrasi database |
+| `npm run truncate` | Mengosongkan semua tabel + cache Redis |
+
+### baji-openjob-consumer
+
+| Perintah | Deskripsi |
+|----------|-----------|
+| `npm start` | Menjalankan consumer worker |
 
 ---
 
 ## :wrench: Development
 
-### :notebook: Pre-Requisites
+### Arsitektur
 
-Pastikan sistem Anda sudah memiliki tools berikut:
+```
+┌─────────────────────┐         ┌──────────────┐         ┌─────────────────────┐
+│  baji-openjob-app   │───────▶│   RabbitMQ   │◀────────│ baji-openjob-consumer│
+│  (Express.js API)   │ publish │  (Message    │ consume │  (Worker/Listener)   │
+│                     │         │   Broker)    │         │                     │
+│  - REST Endpoints   │         └──────────────┘         │  - Email Notifikasi │
+│  - JWT Auth         │                                  │  - Nodemailer       │
+│  - Redis Cache      │         ┌──────────────┐         │                     │
+│  - Multer Upload    │───────▶│  PostgreSQL  │◀────────│                     │
+│                     │         │  (Database)  │         │                     │
+└─────────────────────┘         └──────────────┘         └─────────────────────┘
+                                ┌──────────────┐
+                                │    Redis     │
+                                │   (Cache)    │
+                                └──────────────┘
+```
 
-| Tool         | Versi Minimum | Deskripsi                     |
-|--------------|---------------|-------------------------------|
-| **Node.js**  | v18+          | Runtime JavaScript            |
-| **npm**      | v9+           | Package manager               |
-| **PostgreSQL** | v14+        | Relational database           |
-| **Git**      | v2+           | Version control               |
-
----
-
-### :nut_and_bolt: Development Environment
-
-1. **Fork & Clone** repository ini:
-
-   ```bash
-   git clone https://github.com/bajiff/baji-openjob-api-v2.git
-   cd baji-openjob-api-v2
-   ```
-
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Setup database:**
-
-   ```bash
-   # Buat database
-   createdb db_openjob
-
-   # Jalankan migrasi
-   npm run migrate up
-   ```
-
-4. **Buat file `.env`** (lihat bagian [Installation](#electric_plug-installation) untuk format lengkap).
-
-5. **Jalankan development server:**
-
-   ```bash
-   npm run start:dev
-   ```
-
-6. **Linting:**
-
-   ```bash
-   npm run lint
-   ```
+**Alur Message Queue:**
+1. User melamar pekerjaan via `POST /applications`
+2. API App mempublikasikan pesan `application_created` ke RabbitMQ
+3. Consumer App menerima pesan, query data pelamar ke database
+4. Consumer App mengirim email notifikasi ke pemilik lowongan via Nodemailer
 
 ---
 
-### :file_folder: File Structure
+## :file_folder: File Structure
 
 ```bash
 .
-├── migrations/                              
-│   ├── ..._create-table-users.js
-│   ├── ..._create-table-authentications.js
-│   ├── ..._create-table-companies.js
-│   ├── ..._create-table-categories.js
-│   ├── ..._create-table-jobs.js
-│   ├── ..._create-table-applications.js
-│   └── ..._create-table-bookmarks.js
-├── src/
-│   ├── api/                                 
-│   │   ├── applications/
-│   │   │   ├── handler.js                   # Request handler
-│   │   │   ├── index.js                     # Router factory
-│   │   │   └── routes.js                    # Route definitions
-│   │   ├── authentications/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   └── routes.js
-│   │   ├── bookmarks/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   └── routes.js
-│   │   ├── categories/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   ├── routes.js
-│   │   │   └── schema.js
-│   │   ├── companies/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   └── routes.js
-│   │   ├── jobs/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   └── routes.js
-│   │   ├── profile/
-│   │   │   ├── handler.js
-│   │   │   ├── index.js
-│   │   │   └── routes.js
-│   │   └── users/
-│   │       ├── handler.js
-│   │       ├── index.js
-│   │       └── routes.js
-│   ├── exceptions/                          # Custom Error Classes
-│   │   ├── AuthenticationError.js
-│   │   ├── ClientError.js
-│   │   ├── InvariantError.js
-│   │   └── NotFoundError.js
-│   ├── middlewares/                         # Express Middlewares
-│   │   ├── auth.js                          # JWT authentication middleware
-│   │   └── errorHandler.js                  # Centralized error handler
-│   ├── services/                            # Business Logic & Database
-│   │   └── postgres/
-│   │       ├── ApplicationsService.js
-│   │       ├── AuthenticationsService.js
-│   │       ├── BookmarksService.js
-│   │       ├── CategoriesService.js
-│   │       ├── CompaniesService.js
-│   │       ├── JobsService.js
-│   │       ├── UsersService.js
-│   │       └── pool.js                      # PostgreSQL connection pool
-│   ├── tokenize/                            # JWT Token Management
-│   │   └── TokenManager.js
-│   ├── validator/                           # Request Payload Validation (Joi)
-│   │   ├── applications/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   ├── authentications/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   ├── bookmarks/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   ├── categories/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   ├── companies/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   ├── jobs/
-│   │   │   ├── index.js
-│   │   │   └── schema.js
-│   │   └── users/
-│   │       ├── handler.js
-│   │       ├── index.js
-│   │       └── schema.js
-│   └── server.js                            # Entry point aplikasi
-├── .env                                     # Environment variables (tidak di-commit)
-├── .env.example                             # Template environment variables
+├── baji-openjob-app/                        # API App (Express.js)
+│   ├── migrations/                          # File migrasi database
+│   │   ├── ..._create-table-users.js
+│   │   ├── ..._create-table-authentications.js
+│   │   ├── ..._create-table-companies.js
+│   │   ├── ..._create-table-categories.js
+│   │   ├── ..._create-table-jobs.js
+│   │   ├── ..._create-table-applications.js
+│   │   ├── ..._create-table-bookmarks.js
+│   │   ├── ..._add-user-id-to-companies.js
+│   │   └── ..._create-table-documents.js
+│   ├── src/
+│   │   ├── api/                             # Modul API (handler, routes, index)
+│   │   │   ├── applications/
+│   │   │   ├── authentications/
+│   │   │   ├── bookmarks/
+│   │   │   ├── categories/
+│   │   │   ├── companies/
+│   │   │   ├── documents/
+│   │   │   ├── jobs/
+│   │   │   ├── profile/
+│   │   │   └── users/
+│   │   ├── config/                          # Konfigurasi eksternal
+│   │   │   ├── rabbitmq.js                  # RabbitMQ publisher connection
+│   │   │   └── redis.js                     # Redis client connection
+│   │   ├── exceptions/                      # Custom Error Classes
+│   │   │   ├── AuthenticationError.js
+│   │   │   ├── ClientError.js
+│   │   │   ├── InvariantError.js
+│   │   │   └── NotFoundError.js
+│   │   ├── middlewares/                     # Express Middlewares
+│   │   │   ├── auth.js                      # JWT authentication
+│   │   │   ├── cache.js                     # Redis caching middleware
+│   │   │   ├── errorHandler.js              # Centralized error handler
+│   │   │   └── upload.js                    # Multer PDF upload
+│   │   ├── services/postgres/               # Business Logic & Database
+│   │   │   ├── ApplicationsService.js
+│   │   │   ├── AuthenticationsService.js
+│   │   │   ├── BookmarksService.js
+│   │   │   ├── CategoriesService.js
+│   │   │   ├── CompaniesService.js
+│   │   │   ├── DocumentsService.js
+│   │   │   ├── JobsService.js
+│   │   │   ├── UsersService.js
+│   │   │   └── pool.js
+│   │   ├── tokenize/
+│   │   │   └── TokenManager.js              # JWT token management
+│   │   ├── validator/                       # Request validation (Joi)
+│   │   │   ├── applications/
+│   │   │   ├── authentications/
+│   │   │   ├── bookmarks/
+│   │   │   ├── categories/
+│   │   │   ├── companies/
+│   │   │   ├── jobs/
+│   │   │   └── users/
+│   │   └── server.js                        # Entry point API
+│   ├── uploads/documents/                   # Direktori penyimpanan file PDF
+│   ├── .env.example
+│   ├── eslint.config.js
+│   ├── package.json
+│   └── truncate.js
+│
+├── baji-openjob-consumer/                   # Consumer App (Worker)
+│   ├── src/
+│   │   ├── postgres/
+│   │   │   └── pool.js                      # PostgreSQL connection (independen)
+│   │   └── consumer.js                      # Entry point consumer
+│   ├── .env
+│   └── package.json
+│
+├── docker-compose.yml                       # Redis & RabbitMQ containers
 ├── .gitignore
-├── eslint.config.js                         # ESLint configuration
-├── package.json
-├── package-lock.json
-├── truncate.js                              # Script untuk truncate tabel
 └── README.md
 ```
-
-| No | Direktori/File         | Detail                                                     |
-|----|------------------------|-------------------------------------------------------------|
-| 1  | `src/server.js`        | Entry point — inisialisasi Express, registrasi semua modul  |
-| 2  | `src/api/`             | Kumpulan modul API (handler, routes, index per resource)    |
-| 3  | `src/api/bookmarks/`   | Modul bookmark — simpan lowongan kerja favorit              |
-| 4  | `src/services/`        | Business logic & interaksi database PostgreSQL              |
-| 5  | `src/validator/`       | Validasi payload request menggunakan Joi schema             |
-| 6  | `src/exceptions/`      | Custom error classes untuk error handling yang konsisten     |
-| 7  | `src/middlewares/`     | Middleware autentikasi JWT & error handler                  |
-| 8  | `src/tokenize/`        | Manajemen pembuatan & verifikasi JWT token                  |
-| 9  | `migrations/`          | File migrasi database (node-pg-migrate)                     |
-
----
-
-### :hammer: Build
-
-Proyek ini menggunakan **ES Modules** (`"type": "module"`) dan tidak memerlukan proses build. Cukup pastikan semua dependencies terinstal:
-
-```bash
-npm install
-```
-
----
-
-### :rocket: Deployment
-
-Untuk deployment ke server produksi:
-
-1. **Clone repository** ke server.
-2. **Install dependencies:**
-
-   ```bash
-   npm install --production
-   ```
-
-3. **Konfigurasi `.env`** sesuai environment produksi.
-4. **Jalankan migrasi database:**
-
-   ```bash
-   npm run migrate up
-   ```
-
-5. **Jalankan server:**
-
-   ```bash
-   npm start
-   ```
-
-> 💡 **Tip:** Gunakan process manager seperti [PM2](https://pm2.keymetrics.io/) untuk menjalankan aplikasi di production:
->
-> ```bash
-> npx pm2 start src/server.js --name "openjob-api"
-> ```
-
----
-
-## :cherry_blossom: Community
-
-Proyek ini terbuka untuk kontribusi! Jika Anda tertarik untuk berkontribusi, silakan baca panduan di bawah ini.
-
-### :fire: Contribution
-
-Kontribusi Anda selalu disambut dan dihargai. Berikut beberapa cara untuk berkontribusi:
-
-1. **Report a bug** 🐛
-
-   Jika Anda menemukan bug, silakan laporkan melalui [Issues](https://github.com/bajiff/baji-openjob-api-v2/issues) dan saya akan menanganinya.
-
-2. **Request a feature** 💡
-
-   Anda juga dapat mengajukan fitur baru melalui [Issues](https://github.com/bajiff/baji-openjob-api-v2/issues), dan jika layak, akan dimasukkan ke dalam pengembangan.
-
-3. **Create a pull request** 🔀
-
-   Pull request Anda akan sangat dihargai oleh komunitas. Silakan pilih issue yang terbuka dari [sini](https://github.com/bajiff/baji-openjob-api-v2/issues) dan buat pull request.
-
-> Jika Anda baru mengenal open-source, pastikan untuk membaca lebih lanjut [di sini](https://www.digitalocean.com/community/tutorial_series/an-introduction-to-open-source) dan pelajari cara membuat pull request [di sini](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github).
-
----
-
-### :cactus: Branches
-
-Saya menggunakan metodologi *agile continuous integration*, sehingga versi sering diperbarui dan pengembangan berjalan cepat.
-
-1. **`dev`** — Branch pengembangan (*development*).
-2. **`main`** — Branch produksi (*production*).
-3. Tidak ada branch permanen lain yang harus dibuat di repository utama. Anda dapat membuat *feature branch* tetapi harus di-merge ke `main`.
-
-#### Steps to work with feature branch
-
-1. Untuk mulai mengerjakan fitur baru, buat branch baru dengan prefix `feat` diikuti nama fitur. (contoh: `feat-add-bookmark-jobs`)
-2. Setelah selesai, buat Pull Request.
-
-#### Steps to create a pull request
-
-1. Buat PR ke branch `dev`.
-2. Patuhi best practices dan guideline, misalnya jika PR berkaitan dengan elemen visual, sertakan screenshot.
-3. PR harus lolos semua pengecekan dan mendapatkan review positif.
-
-Setelah itu, perubahan akan di-merge.
-
----
-
-### :exclamation: Guideline
-
-- Gunakan **ES Modules** (`import`/`export`) — bukan CommonJS (`require`).
-- Ikuti pola arsitektur yang sudah ada: **API → Handler → Service → Database**.
-- Validasi semua input menggunakan **Joi schema**.
-- Gunakan **custom error classes** untuk error handling yang konsisten.
-- Jalankan `npm run lint` sebelum membuat PR untuk memastikan kode bersih.
-- Tulis komentar yang jelas pada bagian logika yang kompleks.
 
 ---
 
@@ -520,15 +413,19 @@ Setelah itu, perubahan akan di-merge.
 
 **Q: Apakah saya harus membuat database secara manual?**
 
-> Ya, Anda perlu membuat database PostgreSQL terlebih dahulu menggunakan perintah `createdb db_openjob`. Setelah itu, jalankan `npm run migrate up` untuk membuat tabel-tabel yang diperlukan.
+> Ya, buat database PostgreSQL terlebih dahulu dengan `createdb db_openjob_v2`, lalu jalankan `npm run migrate up` di folder `baji-openjob-app`.
 
 **Q: Bagaimana cara mendapatkan access token?**
 
-> Lakukan POST request ke `/authentications` dengan body `{ "username": "...", "password": "..." }`. Response akan berisi `accessToken` dan `refreshToken`.
+> Lakukan POST ke `/authentications` dengan body `{ "username": "...", "password": "..." }`. Response berisi `accessToken` dan `refreshToken`.
 
-**Q: Apakah API ini memiliki rate limiting?**
+**Q: Kenapa ada 2 folder project terpisah?**
 
-> Saat ini belum. Fitur rate limiting dan API key management direncanakan untuk versi berikutnya.
+> Sesuai best practice microservice. API App dan Consumer App berjalan sebagai proses independen. Keduanya berkomunikasi melalui RabbitMQ, sehingga jika Consumer mati, API tetap berjalan normal.
+
+**Q: Apakah harus menjalankan Docker?**
+
+> Docker hanya untuk mempermudah menjalankan Redis dan RabbitMQ. Jika Tuan sudah menginstal keduanya secara native, Docker tidak diperlukan.
 
 ---
 
@@ -539,13 +436,10 @@ Setelah itu, perubahan akan di-merge.
 - [node-pg-migrate Documentation](https://salsita.github.io/node-pg-migrate/)
 - [Joi Validation Library](https://joi.dev/)
 - [JSON Web Token (JWT)](https://jwt.io/)
+- [RabbitMQ Documentation](https://www.rabbitmq.com/docs)
+- [Redis Documentation](https://redis.io/docs/)
+- [Multer — File Upload](https://github.com/expressjs/multer)
 - [Dicoding — Belajar Fundamental Back-End dengan JavaScript](https://www.dicoding.com/academies/271)
-
----
-
-## :camera: Gallery
-
-*Segera hadir — screenshots dan demo API menggunakan Postman.*
 
 ---
 
@@ -564,21 +458,17 @@ Proyek ini dilisensikan di bawah **ISC License**.
 
 ## :globe_with_meridians: My Social Media
 
-Temukan saya di media sosial berikut:
-
-| Platform     | Link                                                                                                                   |
-|--------------|------------------------------------------------------------------------------------------------------------------------|
-| **GitHub**   | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/bajiff) |
+| Platform | Link |
+|----------|------|
+| **GitHub** | [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/bajiff) |
 | **LinkedIn** | [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/bagus-aji-fernando-466347286/) |
-| **Instagram**| [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/_bajif) |
-| **Threads**  | [![Threads](https://img.shields.io/badge/Threads-000000?style=for-the-badge&logo=threads&logoColor=white)](https://www.threads.com/@_bajif/) |
-| **X**        | [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://www.threads.com/@_bajif/) |   
+| **Instagram** | [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/_bajif) |
+| **Threads** | [![Threads](https://img.shields.io/badge/Threads-000000?style=for-the-badge&logo=threads&logoColor=white)](https://www.threads.com/@_bajif/) |
+| **X** | [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/_bajif) |
 
 ---
 
 ## :mailbox: Contact
-
-Hubungi saya melalui salah satu platform di atas atau buat issue di repository ini:
 
 📧 **GitHub Issues:** [https://github.com/bajiff/baji-openjob-api-v2/issues](https://github.com/bajiff/baji-openjob-api-v2/issues)
 
