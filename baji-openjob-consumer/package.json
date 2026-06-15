@@ -1,0 +1,15 @@
+{
+  "name": "baji-openjob-consumer",
+  "version": "1.0.0",
+  "description": "Worker terpisah baji-openjob-consumer",
+  "main": "src/consumer.js",
+  "scripts": {
+    "start": "node src/consumer.js"
+  },
+  "dependencies": {
+    "amqplib": "^2.0.1",
+    "dotenv": "^17.4.2",
+    "nodemailer": "^9.0.0",
+    "pg": "^8.21.0"
+  }
+}
